@@ -22,6 +22,7 @@ import { Language } from '../lib/Translation/translation';
 import { ReplyAIModal } from '../modal/AIreplyModal';
 import { AIstorage } from '../storage/AIStorage';
 import { UserPreferenceStorage } from '../storage/userPreferenceStorage';
+import { createQuickReply } from '../modal/quickCommands/createquick';
 
 export class Handler implements IHandler {
 	public app: QuickRepliesApp;
@@ -206,4 +207,20 @@ export class Handler implements IHandler {
 			return;
 		}
 	}
+	public async CreateQuickReply(args: string[]): Promise<void> {
+		try {
+		  await createQuickReply(
+			this.app,
+			this.sender,
+			this.room,
+			args,
+			this.read,
+			this.modify,
+			this.persis,
+		  );
+		} catch (error) {
+		  this.app.getLogger().error(`Error in CreateQuickReply: ${error.message}`);
+		}
+	}
+	
 }

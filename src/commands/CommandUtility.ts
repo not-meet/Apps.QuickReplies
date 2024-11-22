@@ -77,7 +77,13 @@ export class CommandUtility implements ICommandUtility {
 				break;
 			}
 			default: {
-				await handler.sendDefault();
+				const subCommand = this.params[0].toLowerCase();
+				if(subCommand === CommandParam.CREATE){
+					await this.handleQuickCreate(handler,this.params);
+				}else{
+					await handler.sendDefault();
+				}
+				break;
 			}
 		}
 	}
@@ -107,4 +113,23 @@ export class CommandUtility implements ICommandUtility {
 			}
 		}
 	}
+
+	private async handleQuickCreate(handler: Handler, args: string[]): Promise<void> {
+		if (!args || args.length === 0) {
+		  await handler.sendDefault();
+		  return;
+		}
+	
+		switch (args[0].toLowerCase()) {
+		  case CommandParam.CREATE: {
+			await handler.CreateQuickReply(args);
+			break;
+		  }
+		  default: {
+			await handler.sendDefault();
+			break;
+		  }
+		}
+	}
+	
 }
