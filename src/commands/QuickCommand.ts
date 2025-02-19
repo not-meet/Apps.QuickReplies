@@ -33,6 +33,8 @@ export class QuickCommand implements ISlashCommand {
 		const triggerId = context.getTriggerId();
 		const threadId = context.getThreadId();
 
+		this.app.setCommandParams(sender.id, params);
+
 		const commandUtilityParams: ICommandUtilityParams = {
 			params,
 			sender,
@@ -46,7 +48,6 @@ export class QuickCommand implements ISlashCommand {
 			app: this.app,
 		};
 
-		const commandUtility = new CommandUtility(commandUtilityParams);
-		await commandUtility.resolveCommand();
+		await new CommandUtility(commandUtilityParams).resolveCommand();
 	}
 }

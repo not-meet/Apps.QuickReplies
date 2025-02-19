@@ -34,16 +34,17 @@ import { AIusagePreference } from '../definition/helper/userPreference';
 import { listReplyContextualBar } from '../modal/listContextualBar';
 import { Receiverstorage } from '../storage/ReceiverStorage';
 import { Replacements } from '../definition/helper/message';
+import { ICommandUtilityParams } from '../definition/command/ICommandUtility';
 
 export class ExecuteViewSubmitHandler {
 	private context: UIKitViewSubmitInteractionContext;
-
 	constructor(
 		protected readonly app: QuickRepliesApp,
 		protected readonly read: IRead,
 		protected readonly http: IHttp,
 		protected readonly persistence: IPersistence,
 		protected readonly modify: IModify,
+		protected readonly params: ICommandUtilityParams['params'],
 		context: UIKitViewSubmitInteractionContext,
 	) {
 		this.context = context;
@@ -80,6 +81,7 @@ export class ExecuteViewSubmitHandler {
 						view,
 						language,
 						triggerId,
+						this.params
 					);
 				case ReplyAIModalEnum.VIEW_ID:
 					return this.handleAIresponse(room, user, view, language);
@@ -118,6 +120,7 @@ export class ExecuteViewSubmitHandler {
 		view: IUIKitSurface,
 		language: Language,
 		triggerId: string,
+		params: ICommandUtilityParams['params'],
 	): Promise<IUIKitResponse> {
 		const nameStateValue =
 			view.state?.[CreateModalEnum.REPLY_NAME_BLOCK_ID]?.[
@@ -127,9 +130,11 @@ export class ExecuteViewSubmitHandler {
 			view.state?.[CreateModalEnum.REPLY_BODY_BLOCK_ID]?.[
 				CreateModalEnum.REPLY_BODY_ACTION_ID
 			];
-
-		const name = nameStateValue ? nameStateValue.trim() : '';
-		const body = bodyStateValue ? bodyStateValue.trim() : '';
+		
+		const argsName = params.length > 1 ? params[1] : undefined;
+		const argsBody = params.length > 2 ? params.slice(2).join(' ') : undefined;
+		const name = argsName ? argsName : nameStateValue ? nameStateValue.trim() : '';
+		const body = argsBody ? argsBody : bodyStateValue ? bodyStateValue.trim() : '';
 		if (!name || !body) {
 			const errorMessage = `${t('Error_Fill_Required_Fields', language)}`;
 			await sendNotification(this.read, this.modify, user, room, {

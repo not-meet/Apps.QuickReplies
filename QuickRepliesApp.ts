@@ -36,9 +36,20 @@ import { settings } from './src/config/settings';
 export class QuickRepliesApp extends App {
 	private elementBuilder: ElementBuilder;
 	private blockBuilder: BlockBuilder;
+	private commandParams = new Map<string, string[]>();
+
 	constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
 		super(info, logger, accessors);
 	}
+
+	public setCommandParams(userId: string, params: string[]) {
+		this.commandParams.set(userId, params);
+	}
+
+	public getCommandParams(userId: string): string[] {
+		return this.commandParams.get(userId) || [];
+	}
+
 	public async initialize(
 		configuration: IConfigurationExtend,
 		_environmentRead: IEnvironmentRead,
@@ -98,12 +109,15 @@ export class QuickRepliesApp extends App {
 		persistence: IPersistence,
 		modify: IModify,
 	) {
+		const userId = context.getInteractionData().user.id;
+		const storedParams = this.getCommandParams(userId);
 		const handler = new ExecuteViewSubmitHandler(
 			this,
 			read,
 			http,
 			persistence,
 			modify,
+			storedParams,
 			context,
 		);
 
