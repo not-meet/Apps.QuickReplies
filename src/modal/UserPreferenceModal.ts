@@ -73,21 +73,39 @@ export async function UserPreferenceModal({
 	);
 
 	blocks.push(blockBuilder.createDividerBlock());
-	const PromptInput = inputElementComponent(
+
+	const promptOptions = [
+		{ key: 'summarize', i18nLabel: t('Summarize_the_conversation', language) },
+		{ key: 'key-points', i18nLabel: t('Extract_key_points', language) },
+		{ key: 'action-items', i18nLabel: t('List_action_items', language) },
+		{ key: 'decisions', i18nLabel: t('Highlight_decisions_made', language) },
+		{ key: 'participants', i18nLabel: t('Participants_summary', language) },
+		{ key: 'files', i18nLabel: t('File_attachments_summary', language) }
+	];
+
+	const promptMultiSelect = elementBuilder.addMultiSelect(
 		{
-			app,
-			label: t('AI_Prompt_Input_Label', language),
-			placeholder: t('AI_Prompt_Input_Placeholder', language),
-			optional: false,
-			initialValue: existingPreference?.AIconfiguration?.AIPrompt,
+			id: 'prompt-config',
+			i18nLabel: t('Summary_Features', language),
+			i18nDescription: t('Select_features_to_include_in_the_summary', language),
+			options: promptOptions,
+			required: true,
+			public: true,
+			packageValue: undefined
 		},
 		{
 			blockId: UserPreferenceModalEnum.PROMPT_CONFIG_INPUT_BLOCK_ID,
 			actionId: UserPreferenceModalEnum.PROMPT_CONFIG_INPUT_ACTION_ID,
-		},
+		}
 	);
 
-	blocks.push(PromptInput);
+	blocks.push(
+		blockBuilder.createInputBlock({
+			text: t('Summary_Features', language),
+			element: promptMultiSelect,
+			optional: false,
+		})
+	);
 
 	const AIusagePreferenceOptions = [
 		{

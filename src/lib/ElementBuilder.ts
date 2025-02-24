@@ -12,12 +12,17 @@ import {
 	PlainTextInputElement,
 	Option,
 	StaticSelectElement,
+	MultiStaticSelectElement,
 } from '@rocket.chat/ui-kit';
 import { PlainTextInputParam } from '../definition/ui-kit/Element/IPlainTextInputElement';
 import {
 	StaticSelectElementParam,
 	StaticSelectOptionsParam,
 } from '../definition/ui-kit/Element/IStaticSelectElement';
+import {
+	MultiSelectParam,
+	MultiSelectOption,
+} from '../definition/ui-kit/Element/IElementBuilder';
 
 export class ElementBuilder implements IElementBuilder {
 	constructor(private readonly appId: string) {}
@@ -145,5 +150,38 @@ export class ElementBuilder implements IElementBuilder {
 			return optionObject;
 		});
 		return options;
+	}
+
+	public addMultiSelect(
+		param: MultiSelectParam,
+		interaction: ElementInteractionParam,
+	): MultiStaticSelectElement {
+		const options = param.options.map((option) => ({
+			text: {
+				type: TextObjectType.PLAIN_TEXT,
+				text: option.i18nLabel,
+			},
+			value: option.key,
+			selected: option.selected,
+		}));
+
+		const multiSelect: MultiStaticSelectElement = {
+			type: BlockElementType.MULTI_STATIC_SELECT,
+			placeholder: {
+				type: TextObjectType.PLAIN_TEXT,
+				text: param.i18nLabel,
+			},
+			options,
+			appId: this.appId,
+			blockId: interaction.blockId,
+			actionId: interaction.actionId,
+			initialValue: Array.isArray(param.packageValue) 
+				? param.packageValue 
+				: param.packageValue 
+					? [param.packageValue]
+					: undefined,
+		};
+
+		return multiSelect;
 	}
 }

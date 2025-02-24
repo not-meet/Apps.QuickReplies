@@ -210,10 +210,9 @@ export class ExecuteViewSubmitHandler {
 				UserPreferenceModalEnum.SELF_HOSTED_URL_ACTION_ID
 			];
 
-		const PromptConfigurationInput =
-			view.state?.[
-				UserPreferenceModalEnum.PROMPT_CONFIG_INPUT_BLOCK_ID
-			]?.[UserPreferenceModalEnum.PROMPT_CONFIG_INPUT_ACTION_ID];
+		const PromptConfigurationInput = view.state?.[
+			UserPreferenceModalEnum.PROMPT_CONFIG_INPUT_BLOCK_ID
+		]?.[UserPreferenceModalEnum.PROMPT_CONFIG_INPUT_ACTION_ID] as string[];
 
 		const userPreference = new UserPreferenceStorage(
 			this.persistence,
@@ -221,12 +220,29 @@ export class ExecuteViewSubmitHandler {
 			user.id,
 		);
 
+		const promptTypes = {
+			'summarize': 'Create a brief and concise summary',
+			'key-points': 'Maintain a formal language in the replies',
+			'action-items': 'give comprehensive explanations and examples',
+			'decisions': 'give actionable tips in replies',
+			'participants': 'Make replies technical',
+			'files': 'Maintain a friendly tone in replies'
+		};
+
+		const selectedPrompts = PromptConfigurationInput?.map(key => promptTypes[key]) || [];
+		console.log('------selectedPrompts------', selectedPrompts,'------------');
+		const combinedPrompt = selectedPrompts.length > 0 
+			? selectedPrompts.join('. Also, ') + '.'
+			: 'Provide a summary of the conversation.'; 
+
+		console.log('------combinedPrompt------', combinedPrompt,'------------');
+
 		await userPreference.storeUserPreference({
 			userId: user.id,
 			language: languageInput,
 			AIusagePreference: AIpreferenceInput,
 			AIconfiguration: {
-				AIPrompt: PromptConfigurationInput,
+				AIPrompt: combinedPrompt,
 				AIProvider: AIoptionInput,
 				openAI: {
 					apiKey: OpenAIAPIKeyInput,

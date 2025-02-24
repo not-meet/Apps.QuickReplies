@@ -86,4 +86,15 @@ export const en = {
 	AI_Gemini_Model_Not_Configured: "Your Gemini Model is not set up properly. Please check your configuration",
 	AI_Workspace_Model_Not_Configured: "Your Workspace AI is not set up properly. Please contact your administrator",
 	AI_Something_Went_Wrong: "Something went wrong. Please try again later.",
-	Refresh_Button_Text: "Refresh"};
+	Refresh_Button_Text: "Refresh",
+	
+	// Summary features translations
+	Summary_Features: "AI prompt",
+	Select_features_to_include_in_the_summary: "Select features to include in the summary",
+	Summarize_the_conversation: "Create a brief and concise summary",
+	Extract_key_points: "Maintain a formal language in the replies",
+	List_action_items: "give comprehensive explanations and examples",
+	Highlight_decisions_made: "give actionable tips in replies ",
+	Participants_summary: "Make replies technical",
+	File_attachments_summary: "Maintain a friendly tone in replies"
+};
