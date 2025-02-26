@@ -166,6 +166,21 @@ export class Handler implements IHandler {
 			.getRoomReader()
 			.getMessages(roomId);
 		const lastMessage = roomMessages.pop();
+		const historicalMessages = await this.read.getRoomReader().getMessages(
+			roomId,
+			{
+				skip: 0,
+				limit: 10,
+				sort: {createdAt: 'desc'} ,
+			}
+		);
+		const messageHistory = historicalMessages
+        .reverse() 
+        .map(msg => ({
+            text: msg.text || msg.attachments?.[0]?.description || '',
+            sender: msg.sender.username
+        }));
+		
 		const Message =
 			message ||
 			lastMessage?.text ||
@@ -179,7 +194,8 @@ export class Handler implements IHandler {
 				this.read.getPersistenceReader(),
 				this.sender.id,
 			);
-			aistorage.updateMessage(textMessage);
+			await aistorage.updateMessage(textMessage);
+			await aistorage.updateMessageHistory(messageHistory);
 			const modal = await ReplyAIModal(
 				this.app,
 				this.sender,

@@ -250,14 +250,14 @@ export class ExecuteBlockActionHandler {
 				);
 				const message = await aiStorage.getMessage();
 				const prompt = await aiStorage.getPrompt();
-
+				const messageHistory = await aiStorage.getMessageHistory();
 				const Preference = await userPreference.getUserPreference();
 
 				const response = await new AIHandler(
 					this.app,
 					this.http,
 					Preference,
-				).handleResponse(user, message, prompt);
+				).handleResponse(user, message, prompt, messageHistory);
 
 				await aiStorage.updateResponse(response);
 

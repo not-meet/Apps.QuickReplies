@@ -24,6 +24,7 @@ class AIHandler {
 		user: IUser,
 		message: string,
 		prompt: string,
+		messageHistory: Array<{ text: string; sender: string }>
 	): Promise<string> {
 		let aiProvider: string;
 		if (
@@ -41,15 +42,15 @@ class AIHandler {
 		switch (aiProvider) {
 			case AIProviderEnum.SelfHosted:
 			case SettingEnum.SELF_HOSTED_MODEL:
-				return this.handleSelfHostedModel(user, message, prompt);
+				return this.handleSelfHostedModel(user, message, prompt, messageHistory);
 
 			case AIProviderEnum.OpenAI:
 			case SettingEnum.OPEN_AI:
-				return this.handleOpenAI(user, message, prompt);
+				return this.handleOpenAI(user, message, prompt, messageHistory);
 
 			case AIProviderEnum.Gemini:
 			case SettingEnum.GEMINI:
-				return this.handleGemini(user, message, prompt);
+				return this.handleGemini(user, message, prompt , messageHistory);
 
 			default:
 				const errorMsg =
@@ -63,14 +64,20 @@ class AIHandler {
 		}
 	}
 
-	private getPrompt(message: string, prompt: string): string {
-		return `Write a reply to this message: "${message}". ${this.userPreference.AIconfiguration.AIPrompt} and Use the following as a prompt or response reply: "${prompt}" and make sure you respond with just the reply without quotes.`;
+	private getPrompt(message: string, prompt: string, messageHistory: Array<{ text: string; sender: string }>): string {
+		const conversationContext = messageHistory
+		.map(msg => `${msg.sender}: ${msg.text}`)
+		.join('\n');
+		// console.log('-----------------------seperator---------------------')
+		// console.log('------------------',message,'--------------------------')
+		return `Take this history as the context of past messages:\n${conversationContext}\n\nUser: ${message}\n\nWrite a reply to this message using the following guidance:\n${this.userPreference.AIconfiguration.AIPrompt}\n${prompt}\n\nMake sure you respond with just the reply without quotes.`;
 	}
 
 	private async handleSelfHostedModel(
 		user: IUser,
 		message: string,
 		prompt: string,
+		messageHistory: Array<{ text: string; sender: string }>
 	): Promise<string> {
 		try {
 			const url = await this.getSelfHostedModelUrl();
@@ -97,7 +104,7 @@ class AIHandler {
 				messages: [
 					{
 						role: 'system',
-						content: this.getPrompt(message, prompt),
+						content: this.getPrompt(message, prompt, messageHistory),
 					},
 				],
 				temperature: 0,
@@ -145,6 +152,7 @@ class AIHandler {
 		user: IUser,
 		message: string,
 		prompt: string,
+		messageHistory: Array<{ text: string; sender: string }>
 	): Promise<string> {
 		try {
 			const { openaikey, openaimodel } = await this.getOpenAIConfig();
@@ -172,7 +180,7 @@ class AIHandler {
 						messages: [
 							{
 								role: 'system',
-								content: this.getPrompt(message, prompt),
+								content: this.getPrompt(message, prompt, messageHistory),
 							},
 						],
 					}),
@@ -222,10 +230,12 @@ class AIHandler {
 		user: IUser,
 		message: string,
 		prompt: string,
+		messageHistory: Array<{ text: string; sender: string }>,
 	): Promise<string> {
 		try {
 			const geminiAPIkey = await this.getGeminiAPIKey();
-
+			// console.log('---------------------seperator---------------------')
+			// console.log(this.getPrompt(message, prompt, messageHistory),'---------------------- logging the prompt')
 			if (!geminiAPIkey) {
 				this.app.getLogger().log('Gemini API key not set Properly');
 
@@ -248,7 +258,7 @@ class AIHandler {
 						contents: [
 							{
 								parts: {
-									text: this.getPrompt(message, prompt),
+									text: this.getPrompt(message, prompt, messageHistory),
 								},
 							},
 						],
